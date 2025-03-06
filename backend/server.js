@@ -69,6 +69,28 @@ app.post("/api/login", (req, res) => {
   });
 });
 
+// API lấy danh sách trip
+app.get("/api/trips", (req, res) => {
+  const { category } = req.query;
+  console.log("Received category:", category); // 👈 Kiểm tra dữ liệu từ frontend
+
+  let sql = "SELECT * FROM trip";
+  let params = [];
+
+  if (category && category !== "all") { // 👈 Tránh lỗi khi category là 'all'
+    sql += " WHERE category = ?";
+    params.push(category);
+  }
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error("Lỗi MySQL:", err);
+      return res.status(500).json({ error: "Lỗi lấy dữ liệu từ MySQL" });
+    }
+    res.json(result);
+  });
+});
+
 // Chạy server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server đang chạy tại http://127.0.0.1:${PORT}`));
