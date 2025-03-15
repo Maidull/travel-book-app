@@ -31,17 +31,17 @@ export default function SignUp() {
     const trimmedName = name.trim();
 
     if (!trimmedEmail || !trimmedPassword || !trimmedName) {
-      Alert.show("Please enter all details", ToastAndroid.LONG);
+      Alert.alert("Please enter all details");
       return;
     }
 
     if (!isValidEmail(trimmedEmail)) {
-      Alert.show("Invalid email format", ToastAndroid.LONG);
+      Alert.alert("Invalid email format");
       return;
     }
 
     if (trimmedPassword.length < 6) {
-      Alert.show("Password must be at least 6 characters", ToastAndroid.LONG);
+      Alert.alert("Password must be at least 6 characters");
       return;
     }
 
@@ -50,13 +50,17 @@ export default function SignUp() {
 
       const token = response.data.token;
 
+      if (!token) {
+        throw new Error("Token is undefined");
+      }
+
       await AsyncStorage.setItem("userToken", token);
 
-      ToastAndroid.show("Account created successfully!", ToastAndroid.LONG);
-      router.replace("/");
+      Alert.alert("Account created successfully!");
+      router.replace("/auth/sign-in"); // Chuyển hướng sang trang đăng nhập
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      ToastAndroid.show(error.response?.data?.message || "Failed to create account", ToastAndroid.LONG);
+      Alert.alert(error.response?.data?.message || "Failed to create account");
     }
   };
 

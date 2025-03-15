@@ -22,10 +22,6 @@ export default function Welcome() {
   };
 
   return (
-    <Animated.View
-      exiting={FadeOut.duration(300)} // Hiệu ứng mờ dần khi rời khỏi trang
-      style={{ flex: 1 }}
-    >
     <ImageBackground
       source={{
         uri: "https://r1.ilikewallpaper.net/iphone-14-wallpapers/download-25189/Nature-Mist-Mountain-Wood-Forest-River-Landscape.jpg",
@@ -43,7 +39,6 @@ export default function Welcome() {
         />
       </View>
     </ImageBackground>
-    </Animated.View>
   );
 }
 
