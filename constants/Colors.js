@@ -26,6 +26,6 @@ export const Colors = {
   bgColor: '#F4F4F4',
   black: '#27283a',
   white: '#ffffff',
-  primaryColor: '#4EEE94'
+  primaryColor: '#6ad1f5'
 };
 

@@ -8,56 +8,49 @@ type Props = {
     onCategoryChanged: (category: string) => void;
 } 
 
-const CategoryBtn = ({onCategoryChanged}: Props) => {
-    const ScrollRef = useRef<ScrollView>(null);
-    
-    const itemRef = useRef<Array<React.RefObject<View>>>(
-        destinationsCategories.map(() => React.createRef<View>())
-    );
-
+const CategoryBtn = ({ onCategoryChanged }: Props) => {
     const [activeIndex, setActiveIndex] = useState(0);
-
+    const destinationsCategories = [
+        { key: "vietnam", title: "Vietnam", iconName: "map" },
+        { key: "global", title: "Global", iconName: "earth" },
+        { key: "island", title: "Island", iconName: "island" },
+        { key: "moutain", title: "Mountain", iconName: "moutain" },
+        { key: "beach", title: "Beach", iconName: "beach" },
+      ];
+  
     const handleSelectCategory = (index: number) => {
-        const selectedCategory = destinationsCategories[index].title;
-        console.log("Selected category:", selectedCategory); // Kiểm tra giá trị chọn
-        setActiveIndex(index);
-        onCategoryChanged(selectedCategory);
+      const selectedCategory = destinationsCategories[index].key; 
+      setActiveIndex(index);
+      onCategoryChanged(selectedCategory); 
     };
-
+  
     return (
-        <View>
-            <Text style={styles.title}>Categories</Text>
-            <ScrollView
-                ref={ScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                    gap: 20,
-                    paddingVertical: 10,
-                    marginBottom: 10,
-                }}
+      <View>
+        <Text style={styles.title}>Categories</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            gap: 20,
+            paddingVertical: 10,
+            marginBottom: 10,
+          }}
+        >
+          {destinationsCategories.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handleSelectCategory(index)}
+              style={activeIndex === index ? styles.categoryBtnActive : styles.categoryBtn}
             >
-                {destinationsCategories.map((item, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        ref={itemRef.current[index]} 
-                        onPress={() => handleSelectCategory(index)}
-                        style={activeIndex === index ? styles.categoryBtnActive : styles.categoryBtn}
-                    >
-                        <MaterialCommunityIcons
-                            name={item.iconName as any}
-                            size={20}
-                            color={activeIndex === index ? Colors.white : Colors.black}
-                        />
-                        <Text style={activeIndex === index ? styles.categoryBtnTxtActive : styles.categoryTxt}>
-                            {item.title}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-        </View>
+              <Text style={activeIndex === index ? styles.categoryBtnTxtActive : styles.categoryTxt}>
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
     );
-};
+  };
 
 export default CategoryBtn;
 

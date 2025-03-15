@@ -28,31 +28,31 @@ export default function SignUp() {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
     const trimmedName = name.trim();
-  
+
     if (!trimmedEmail || !trimmedPassword || !trimmedName) {
       ToastAndroid.show("Please enter all details", ToastAndroid.LONG);
       return;
     }
-  
+
     if (!isValidEmail(trimmedEmail)) {
       ToastAndroid.show("Invalid email format", ToastAndroid.LONG);
       return;
     }
-  
+
     if (trimmedPassword.length < 6) {
       ToastAndroid.show("Password must be at least 6 characters", ToastAndroid.LONG);
       return;
     }
-  
+
     try {
       const response = await register(trimmedEmail, trimmedPassword, trimmedName);
-      
+
       const token = response.data.token;
-  
-      await AsyncStorage.setItem("userToken", token); 
-  
+
+      await AsyncStorage.setItem("userToken", token);
+
       ToastAndroid.show("Account created successfully!", ToastAndroid.LONG);
-      router.replace("/"); 
+      router.replace("/");
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
       ToastAndroid.show(error.response?.data?.message || "Failed to create account", ToastAndroid.LONG);
@@ -82,7 +82,10 @@ export default function SignUp() {
         <TextInput secureTextEntry style={styles.input} placeholder="Enter password" value={password} onChangeText={setPassword} />
       </View>
 
-      <TouchableOpacity onPress={OnCreateAccount} style={styles.createButton}>
+      <TouchableOpacity
+        onPress={OnCreateAccount}
+        style={[styles.createButton, { backgroundColor: Colors.primaryColor }]} 
+      >
         <Text style={styles.buttonText}>Create Account</Text>
       </TouchableOpacity>
 
@@ -94,13 +97,13 @@ export default function SignUp() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 25, paddingTop: 40, backgroundColor: Colors.WHITE, height: "100%" },
+  container: { padding: 25, paddingTop: 40, backgroundColor: Colors.white, height: "100%" },
   title: { fontFamily: "outfit-bold", fontSize: 30, marginTop: 30 },
   inputContainer: { marginTop: 10 },
   label: { fontFamily: "outfit" },
   input: { padding: 15, borderWidth: 1, borderRadius: 15, borderColor: Colors.GRAY, fontFamily: "outfit" },
-  createButton: { padding: 20, backgroundColor: Colors.PRIMARY, borderRadius: 15, marginTop: 50 },
-  buttonText: { color: Colors.WHITE, textAlign: "center" },
+  createButton: { padding: 20, borderRadius: 15, marginTop: 50 },
+  buttonText: { color: Colors.white, textAlign: "center" },
   signInButton: { padding: 20, backgroundColor: Colors.WHITE, borderRadius: 15, marginTop: 20, borderWidth: 1 },
   signInText: { color: Colors.PRIMARY, textAlign: "center" },
 });

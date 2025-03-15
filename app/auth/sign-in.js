@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Colors } from "../../constants/Colors";
 import { useRouter } from "expo-router";
 import { login } from "../../services/api";
+import API_URL from "../../services/config";
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -12,20 +13,28 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      ToastAndroid.show("Please enter email and password", ToastAndroid.LONG);
+      Alert.alert("Error", "Please enter email and password");
       return;
     }
-
+  
     try {
       const response = await login(email.trim(), password.trim());
-      const token = response.data.token;
-
-      await AsyncStorage.setItem("userToken", token); 
-
-      ToastAndroid.show("Login successful!", ToastAndroid.LONG);
-      router.replace("/"); 
+      const token = response.data?.token;
+      const user = response.data?.user;
+  
+      if (!token || !user) {
+        throw new Error("Invalid response from server");
+      }
+  
+      await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userInfo", JSON.stringify(user));
+      console.log("UserInfo đã lưu vào AsyncStorage:", user);
+  
+      Alert.alert("Success", "Login successful!");
+      router.replace("/home");
     } catch (error) {
-      ToastAndroid.show("Login failed. Check your credentials.", ToastAndroid.LONG);
+      console.error("Login error:", error.message);
+      Alert.alert("Error", "Login failed. Check your credentials.");
     }
   };
 
@@ -45,7 +54,7 @@ export default function SignInScreen() {
 
       <TouchableOpacity
         onPress={handleSignIn}
-        style={styles.createButton}
+        style={[styles.createButton, { backgroundColor: Colors.primaryColor }]} 
       >
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
@@ -60,13 +69,13 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 25, paddingTop: 40, backgroundColor: Colors.WHITE, height: "100%" },
+  container: { padding: 25, paddingTop: 40, backgroundColor: Colors.white, height: "100%" },
   title: { fontFamily: "outfit-bold", fontSize: 30, marginTop: 30 },
   inputContainer: { marginTop: 10 },
   label: { fontFamily: "outfit" },
   input: { padding: 15, borderWidth: 1, borderRadius: 15, borderColor: Colors.GRAY, fontFamily: "outfit" },
-  createButton: { padding: 20, backgroundColor: Colors.PRIMARY, borderRadius: 15, marginTop: 50 },
-  buttonText: { color: Colors.WHITE, textAlign: "center" },
-  signInButton: { padding: 20, backgroundColor: Colors.WHITE, borderRadius: 15, marginTop: 20, borderWidth: 1 },
+  createButton: { padding: 20, borderRadius: 15, marginTop: 50 },
+  buttonText: { color: Colors.black, textAlign: "center" },
+  signInButton: { padding: 20, backgroundColor: Colors.black, borderRadius: 15, marginTop: 20, borderWidth: 1 },
   signInText: { color: Colors.PRIMARY, textAlign: "center" },
 });

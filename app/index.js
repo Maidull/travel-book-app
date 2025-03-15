@@ -13,7 +13,7 @@ export default function Index() {
       if (token) {
         router.replace("/home"); 
       } else {
-        router.replace("/auth/sign-in"); 
+        router.replace("/auth/welcome"); 
       }
       setLoading(false);
     };
@@ -22,8 +22,14 @@ export default function Index() {
   }, []);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="blue" style={{ flex: 1, justifyContent: "center" }} />;
+    return (
+      <ActivityIndicator
+        size="large"
+        color="blue"
+        style={{ flex: 1, justifyContent: "center" }}
+      />
+    );
   }
 
-  return <View />; 
+  return <View />;
 }

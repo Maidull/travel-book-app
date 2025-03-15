@@ -65,33 +65,218 @@ app.post("/api/login", (req, res) => {
       expiresIn: "1h",
     });
 
-    res.json({ message: "Đăng nhập thành công!", token });
+    res.json({
+      message: "Đăng nhập thành công!",
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name || "Guest", 
+        image: user.image || null, 
+      },
+    });
+  });
+});
+
+// API cập nhật avatar
+app.post("/api/update-avatar", (req, res) => {
+  const { user_id, image } = req.body;
+
+  if (!user_id || !image) {
+    return res.status(400).json({ error: "Thiếu user_id hoặc link ảnh" });
+  }
+
+  const sql = "UPDATE users SET image = ? WHERE id = ?";
+
+  db.query(sql, [image, user_id], (err, result) => {
+    if (err) {
+      console.error("Lỗi khi cập nhật avatar:", err);
+      return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+    }
+
+    res.json({ message: "Cập nhật avatar thành công" });
   });
 });
 
 // API lấy danh sách trip
 app.get("/api/trips", (req, res) => {
-  const { category } = req.query;
-  console.log("Received category:", category); // 👈 Kiểm tra dữ liệu từ frontend
+  const { category, search } = req.query;
 
-  let sql = "SELECT * FROM trip";
-  let params = [];
+  let sql = "SELECT * FROM trip WHERE 1=1";
+  const params = [];
 
-  if (category && category !== "all") { // 👈 Tránh lỗi khi category là 'all'
-    sql += " WHERE category = ?";
+  if (category && category !== "all") {
+    sql += " AND category = ?";
     params.push(category);
   }
 
-  db.query(sql, params, (err, result) => {
+  if (search) {
+    sql += " AND name LIKE ?";
+    params.push(`%${search}%`);
+  }
+
+  db.query(sql, params, (err, results) => {
     if (err) {
-      console.error("Lỗi MySQL:", err);
-      return res.status(500).json({ error: "Lỗi lấy dữ liệu từ MySQL" });
+      console.error("Lỗi khi lấy danh sách trips:", err);
+      return res.status(500).json({ error: "Lỗi khi lấy danh sách trips" });
     }
+    res.json(results);
+  });
+});
+
+// API lấy danh sách trip theo id
+app.get("/api/trip/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.query("SELECT * FROM trip WHERE id = ?", [id], (err, result) => {
+    if (err) {
+      console.error("MySQL Error:", err);
+      return res.status(500).json({ error: "Failed to fetch trip data" });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+    res.json(result[0]);
+  });
+});
+
+// API đặt chuyến đi
+app.post("/api/book", (req, res) => {
+  const { user_id, trip_id } = req.body;
+
+  if (!user_id || !trip_id) {
+      return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
+  }
+
+  const sql = "INSERT INTO users_trip (user_id, trip_id, status) VALUES (?, ?, 'booked')";
+
+  db.query(sql, [user_id, trip_id], (err, result) => {
+      if (err) {
+          console.error("Lỗi khi book trip:", err);
+          return res.status(500).json({ error: "Lỗi khi book trip" });
+      }
+      res.json({ message: "Đặt chuyến đi thành công", booking_id: result.insertId });
+  });
+});
+
+// API hủy chuyến đi
+app.post("/api/cancel", (req, res) => {
+  const { user_id, trip_id } = req.body;
+
+  if (!user_id || !trip_id) {
+      return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
+  }
+
+  const sql = "UPDATE users_trip SET status = 'cancelled' WHERE user_id = ? AND trip_id = ?";
+
+  db.query(sql, [user_id, trip_id], (err, result) => {
+      if (err) {
+          console.error("Lỗi khi hủy trip:", err);
+          return res.status(500).json({ error: "Lỗi khi hủy trip" });
+      }
+      res.json({ message: "Hủy chuyến đi thành công" });
+  });
+});
+
+// API lấy status danh sách các chuyến đi đã đặt
+app.get("/api/book-status/:trip_id", (req, res) => {
+  const { trip_id } = req.params;
+  const { user_id } = req.query;
+
+  if (!user_id || !trip_id) {
+    return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
+  }
+
+  const sql = `
+    SELECT status FROM users_trip
+    WHERE user_id = ? AND trip_id = ? AND status = 'booked'
+  `;
+
+  db.query(sql, [user_id, trip_id], (err, result) => {
+    if (err) {
+      console.error("Lỗi khi kiểm tra trạng thái trip:", err);
+      return res.status(500).json({ error: "Lỗi khi kiểm tra trạng thái trip" });
+    }
+
+    res.json({ isBooked: result.length > 0 });
+  });
+});
+
+// API lấy danh sách các chuyến đi đã đặt
+app.get("/api/booked-trips/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ error: "Thiếu user_id" });
+  }
+
+  const sql = `
+    SELECT t.id, t.name, t.image, t.location, t.price, t.duration, t.rating
+    FROM trip t
+    INNER JOIN users_trip ut ON t.id = ut.trip_id
+    WHERE ut.user_id = ? AND ut.status = 'booked'
+  `;
+
+  db.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Lỗi khi lấy danh sách booked trips:", err);
+      return res.status(500).json({ error: "Lỗi khi lấy danh sách booked trips" });
+    }
+
     res.json(result);
+  });
+});
+
+// API thêm bài viết
+app.post("/api/posts", (req, res) => {
+  const { user_id, title, content, image_url, location } = req.body;
+  const sql = "INSERT INTO posts (user_id, title, content, image_url, location) VALUES (?, ?, ?, ?, ?)";
+  db.query(sql, [user_id, title, content, image_url, location], (err, result) => {
+      if (err) return res.status(500).json({ error: "Lỗi thêm bài viết" });
+      res.json({ message: "Đã đăng bài thành công!", postId: result.insertId });
+  });
+});
+
+// API lấy danh sách bài viết
+app.get("/api/posts", (req, res) => {
+  const sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.id ORDER BY created_at DESC";
+  db.query(sql, (err, result) => {
+      if (err) return res.status(500).json({ error: "Lỗi lấy danh sách bài viết" });
+      res.json(result);
+  });
+});
+
+// API cmt bài viết
+app.post("/api/comments", (req, res) => {
+  const { post_id, user_id, content } = req.body;
+  const sql = "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)";
+  db.query(sql, [post_id, user_id, content], (err, result) => {
+      if (err) return res.status(500).json({ error: "Lỗi bình luận" });
+      res.json({ message: "Đã bình luận thành công!" });
+  });
+});
+
+// API like bài viết 
+app.post("/api/likes", (req, res) => {
+  const { post_id, user_id } = req.body;
+  const sql = "INSERT INTO likes (post_id, user_id) VALUES (?, ?)";
+  db.query(sql, [post_id, user_id], (err, result) => {
+      if (err) return res.status(500).json({ error: "Lỗi thích bài viết" });
+      res.json({ message: "Đã like bài viết!" });
+  });
+});
+
+// API bỏ like bài viết
+app.delete("/api/likes", (req, res) => {
+  const { post_id, user_id } = req.body;
+  const sql = "DELETE FROM likes WHERE post_id = ? AND user_id = ?";
+  db.query(sql, [post_id, user_id], (err, result) => {
+      if (err) return res.status(500).json({ error: "Lỗi bỏ like" });
+      res.json({ message: "Đã bỏ like bài viết!" });
   });
 });
 
 // Chạy server
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server đang chạy tại http://127.0.0.1:${PORT}`));
+app.listen(PORT, "0.0.0.0" , () => console.log(`Server đang chạy tại http://127.0.0.1:${PORT}`));
 
