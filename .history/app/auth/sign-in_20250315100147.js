@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Colors } from "../../constants/Colors";
 import { useRouter } from "expo-router";
@@ -91,13 +91,13 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   backgroundImage: {
-    flex: 1, 
+    flex: 1, // Full màn hình
   },
   container: {
     flex: 1,
     padding: 25,
     paddingTop: 40,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Lớp phủ mờ trên hình nền
   },
   title: {
     fontSize: 24,

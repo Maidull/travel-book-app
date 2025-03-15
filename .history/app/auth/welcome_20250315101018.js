@@ -28,7 +28,7 @@ export default function Welcome() {
     >
     <ImageBackground
       source={{
-        uri: "https://r1.ilikewallpaper.net/iphone-14-wallpapers/download-25189/Nature-Mist-Mountain-Wood-Forest-River-Landscape.jpg",
+        uri: "https://img.taotu.cn/ssd/ssd1/1/2022-07-16/1_3499ea38092f05944e78b9f521fc1865.jpg",
       }}
       style={styles.background}
     >

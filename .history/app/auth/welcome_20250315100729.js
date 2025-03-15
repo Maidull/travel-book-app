@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Colors } from "../../constants/Colors";
-import Animated, { FadeOut } from "react-native-reanimated";
 
 export default function Welcome() {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
@@ -25,10 +24,10 @@ export default function Welcome() {
     <Animated.View
       exiting={FadeOut.duration(300)} // Hiệu ứng mờ dần khi rời khỏi trang
       style={{ flex: 1 }}
-    >
+    ></Animated.View>
     <ImageBackground
       source={{
-        uri: "https://r1.ilikewallpaper.net/iphone-14-wallpapers/download-25189/Nature-Mist-Mountain-Wood-Forest-River-Landscape.jpg",
+        uri: "https://img.taotu.cn/ssd/ssd1/1/2022-07-16/1_3499ea38092f05944e78b9f521fc1865.jpg",
       }}
       style={styles.background}
     >
@@ -43,7 +42,6 @@ export default function Welcome() {
         />
       </View>
     </ImageBackground>
-    </Animated.View>
   );
 }
 

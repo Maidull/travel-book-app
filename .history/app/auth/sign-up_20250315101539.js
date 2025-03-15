@@ -63,7 +63,7 @@ export default function SignUp() {
   return (
     <ImageBackground
       source={{
-        uri: "https://d29fhpw069ctt2.cloudfront.net/photo/thumb/36619/spring-river.jpg",
+        uri: "https://img.taotu.cn/ssd/ssd1/1/2022-07-16/1_3499ea38092f05944e78b9f521fc1865.jpg",
       }}
       style={styles.backgroundImage}
       imageStyle={{ resizeMode: "cover" }}

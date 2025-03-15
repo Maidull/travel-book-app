@@ -63,52 +63,31 @@ export default function SignUp() {
   return (
     <ImageBackground
       source={{
-        uri: "https://d29fhpw069ctt2.cloudfront.net/photo/thumb/36619/spring-river.jpg",
+        uri: "https://img.taotu.cn/ssd/ssd1/1/2022-07-16/1_3499ea38092f05944e78b9f521fc1865.jpg",
       }}
       style={styles.backgroundImage}
       imageStyle={{ resizeMode: "cover" }}
     >
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Create New Account</Text>
+        <Text style={styles.title}>Create new account</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Name"
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-            value={name}
-            onChangeText={setName}
-          />
+          <TextInput style={styles.input} placeholder="Enter Name" value={name} onChangeText={setName} />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Email"
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+          <TextInput style={styles.input} placeholder="Enter Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            secureTextEntry
-            style={styles.input}
-            placeholder="Enter Password"
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-            value={password}
-            onChangeText={setPassword}
-          />
+          <TextInput secureTextEntry style={styles.input} placeholder="Enter password" value={password} onChangeText={setPassword} />
         </View>
 
         <TouchableOpacity
@@ -118,8 +97,8 @@ export default function SignUp() {
           <Text style={styles.buttonText}>Create Account</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.replace("/auth/sign-in")}>
-          <Text style={styles.buttonText}>Already have an account? Sign In</Text>
+        <TouchableOpacity onPress={() => router.replace("/auth/sign-in")} style={styles.signInButton}>
+          <Text style={styles.signInText}>Sign in</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -134,7 +113,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 25,
     paddingTop: 40,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", 
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Lớp phủ mờ trên hình nền
   },
   backButton: {
     marginBottom: 20,
@@ -159,8 +138,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
     borderColor: "rgba(255, 255, 255, 0.5)", 
-    backgroundColor: "rgba(255, 255, 255, 0.3)", 
-    color: "white", 
+    backgroundColor: "rgba(255, 255, 255, 0.3)", // Nền trong suốt xám xám
+    color: "white", // Màu chữ trắng
     fontFamily: "outfit",
   },
   createButton: {
