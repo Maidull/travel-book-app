@@ -67,9 +67,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         shadowColor: "#333333",
-        shadowOffset: { width: 1, height: 2 },
+        shadowOffset: { width: 3, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 3,
+        shadowRadius: 5,
+        borderRadius: 10,
     },
     categoryBtnActive: {
         flexDirection: "row",
@@ -80,7 +81,8 @@ const styles = StyleSheet.create({
         shadowColor: "#333333",
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 3,
+        shadowRadius: 5,
+        borderRadius: 10,
     },
     categoryTxt: {
         marginLeft: 5,

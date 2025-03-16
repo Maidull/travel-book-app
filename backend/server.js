@@ -33,7 +33,6 @@ app.post("/api/register", async (req, res) => {
   const { email, password, name } = req.body;
 
   try {
-    // Kiểm tra email đã tồn tại
     db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
       if (err) {
         console.error("Lỗi truy vấn:", err);
@@ -42,7 +41,6 @@ app.post("/api/register", async (req, res) => {
       console.log("Kết quả truy vấn:", results);
       if (results.length > 0) return res.status(400).json({ error: "Email đã tồn tại!" });
 
-      // Nếu email chưa tồn tại, tiếp tục đăng ký
       const hashedPassword = await bcrypt.hash(password, 10);
 
       db.query(
@@ -51,7 +49,6 @@ app.post("/api/register", async (req, res) => {
         (err, result) => {
           if (err) return res.status(500).json({ error: "Lỗi khi đăng ký" });
 
-          // Tạo token
           const token = jwt.sign({ id: result.insertId, email }, process.env.JWT_SECRET, {
             expiresIn: "1h",
           });
@@ -88,8 +85,9 @@ app.post("/api/login", (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name || "Guest", 
-        image: user.image || null, 
+        name: user.name || "Guest",
+        image: user.image || null,
+        role: user.role,
       },
     });
   });
@@ -162,17 +160,17 @@ app.post("/api/book", (req, res) => {
   const { user_id, trip_id } = req.body;
 
   if (!user_id || !trip_id) {
-      return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
+    return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
   }
 
   const sql = "INSERT INTO users_trip (user_id, trip_id, status) VALUES (?, ?, 'booked')";
 
   db.query(sql, [user_id, trip_id], (err, result) => {
-      if (err) {
-          console.error("Lỗi khi book trip:", err);
-          return res.status(500).json({ error: "Lỗi khi book trip" });
-      }
-      res.json({ message: "Đặt chuyến đi thành công", booking_id: result.insertId });
+    if (err) {
+      console.error("Lỗi khi book trip:", err);
+      return res.status(500).json({ error: "Lỗi khi book trip" });
+    }
+    res.json({ message: "Đặt chuyến đi thành công", booking_id: result.insertId });
   });
 });
 
@@ -181,17 +179,17 @@ app.post("/api/cancel", (req, res) => {
   const { user_id, trip_id } = req.body;
 
   if (!user_id || !trip_id) {
-      return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
+    return res.status(400).json({ error: "Thiếu user_id hoặc trip_id" });
   }
 
   const sql = "UPDATE users_trip SET status = 'cancelled' WHERE user_id = ? AND trip_id = ?";
 
   db.query(sql, [user_id, trip_id], (err, result) => {
-      if (err) {
-          console.error("Lỗi khi hủy trip:", err);
-          return res.status(500).json({ error: "Lỗi khi hủy trip" });
-      }
-      res.json({ message: "Hủy chuyến đi thành công" });
+    if (err) {
+      console.error("Lỗi khi hủy trip:", err);
+      return res.status(500).json({ error: "Lỗi khi hủy trip" });
+    }
+    res.json({ message: "Hủy chuyến đi thành công" });
   });
 });
 
@@ -331,7 +329,6 @@ app.get("/api/comments/:post_id", (req, res) => {
 app.post("/api/likes", (req, res) => {
   const { post_id, user_id } = req.body;
 
-  // Kiểm tra xem người dùng đã like bài viết chưa
   const checkSql = "SELECT * FROM likes WHERE post_id = ? AND user_id = ?";
   db.query(checkSql, [post_id, user_id], (err, results) => {
     if (err) return res.status(500).json({ error: "Lỗi kiểm tra like" });
@@ -340,17 +337,14 @@ app.post("/api/likes", (req, res) => {
       return res.status(400).json({ error: "Bạn đã like bài viết này rồi!" });
     }
 
-    // Thêm like vào bảng likes
     const insertSql = "INSERT INTO likes (post_id, user_id) VALUES (?, ?)";
     db.query(insertSql, [post_id, user_id], (err, result) => {
       if (err) return res.status(500).json({ error: "Lỗi thích bài viết" });
 
-      // Cập nhật likes_count trong bảng posts
       const updateSql = "UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?";
       db.query(updateSql, [post_id], (err, updateResult) => {
         if (err) return res.status(500).json({ error: "Lỗi cập nhật số lượng like" });
 
-        // Trả về số lượng like mới
         const countSql = "SELECT likes_count FROM posts WHERE id = ?";
         db.query(countSql, [post_id], (err, countResult) => {
           if (err) return res.status(500).json({ error: "Lỗi lấy số lượng like" });
@@ -361,22 +355,18 @@ app.post("/api/likes", (req, res) => {
   });
 });
 
-
 // API bỏ like bài viết
 app.delete("/api/likes/:post_id/:user_id", (req, res) => {
   const { post_id, user_id } = req.params;
 
-  // Xóa like khỏi bảng likes
   const deleteSql = "DELETE FROM likes WHERE post_id = ? AND user_id = ?";
   db.query(deleteSql, [post_id, user_id], (err, result) => {
     if (err) return res.status(500).json({ error: "Lỗi bỏ like" });
 
-    // Cập nhật likes_count trong bảng posts
     const updateSql = "UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?";
     db.query(updateSql, [post_id], (err, updateResult) => {
       if (err) return res.status(500).json({ error: "Lỗi cập nhật số lượng like" });
 
-      // Trả về số lượng like mới
       const countSql = "SELECT likes_count FROM posts WHERE id = ?";
       db.query(countSql, [post_id], (err, countResult) => {
         if (err) return res.status(500).json({ error: "Lỗi lấy số lượng like" });
@@ -390,7 +380,6 @@ app.delete("/api/likes/:post_id/:user_id", (req, res) => {
 app.delete("/api/posts/:post_id/:user_id", (req, res) => {
   const { post_id, user_id } = req.params;
 
-  // Kiểm tra xem bài đăng có thuộc về user không
   const checkSql = "SELECT * FROM posts WHERE id = ? AND user_id = ?";
   db.query(checkSql, [post_id, user_id], (err, results) => {
     if (err) return res.status(500).json({ error: "Lỗi kiểm tra quyền xóa bài đăng" });
@@ -399,7 +388,6 @@ app.delete("/api/posts/:post_id/:user_id", (req, res) => {
       return res.status(403).json({ error: "Bạn không có quyền xóa bài đăng này!" });
     }
 
-    // Xóa bài đăng
     const deleteSql = "DELETE FROM posts WHERE id = ?";
     db.query(deleteSql, [post_id], (err, result) => {
       if (err) return res.status(500).json({ error: "Lỗi xóa bài đăng" });
@@ -409,7 +397,58 @@ app.delete("/api/posts/:post_id/:user_id", (req, res) => {
   });
 });
 
+// API admin add trips
+app.post("/api/trips", (req, res) => {
+  const { name, location, price, image, category, description, duration, rating } = req.body;
+
+  if (!name || !location || !price || !image || !category || !description || !duration) {
+    return res.status(400).json({ error: "All fields except rating are required" });
+  }
+
+  const sql = "INSERT INTO trip (name, location, price, image, category, description, duration, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  db.query(sql, [name, location, price, image, category, description, duration, rating || 0], (err, result) => {
+    if (err) {
+      console.error("Error adding trip:", err);
+      return res.status(500).json({ error: "Failed to add trip" });
+    }
+    res.json({ message: "Trip added successfully!", tripId: result.insertId });
+  });
+});
+
+// API admin edit trip 
+app.put("/api/trips/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, location, price, image, category, description, duration } = req.body;
+
+  if (!name || !location || !price || !image || !category || !description || !duration) {
+    return res.status(400).json({ error: "All fields are required!" });
+  }
+
+  const sql = "UPDATE trip SET name = ?, location = ?, price = ?, image = ?, category = ?, description = ?, duration = ? WHERE id = ?";
+  db.query(sql, [name, location, price, image, category, description, duration, id], (err, result) => {
+    if (err) {
+      console.error("Error updating trip:", err);
+      return res.status(500).json({ error: "Failed to update trip" });
+    }
+    res.json({ message: "Trip updated successfully!" });
+  });
+});
+
+// API admin delete trip
+app.delete("/api/trips/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = "DELETE FROM trip WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("Error deleting trip:", err);
+      return res.status(500).json({ error: "Failed to delete trip" });
+    }
+    res.json({ message: "Trip deleted successfully!" });
+  });
+});
+
 // Chạy server
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, "0.0.0.0" , () => console.log(`Server đang chạy tại http://127.0.0.1:${PORT}`));
+app.listen(PORT, "0.0.0.0", () => console.log(`Server đang chạy tại http://127.0.0.1:${PORT}`));
 

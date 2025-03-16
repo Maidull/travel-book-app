@@ -6,37 +6,43 @@ import { useRouter } from "expo-router";
 import { login } from "../../services/api";
 import API_URL from "../../services/config";
 
-export default function SignInScreen() {
+export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please enter email and password");
-      return;
+        Alert.alert("Error", "Please enter email and password");
+        return;
     }
-  
+
     try {
-      const response = await login(email.trim(), password.trim());
-      const token = response.data?.token;
-      const user = response.data?.user;
-  
-      if (!token || !user) {
-        throw new Error("Invalid response from server");
-      }
-  
-      await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userInfo", JSON.stringify(user));
-      console.log("UserInfo đã lưu vào AsyncStorage:", user);
-  
-      Alert.alert("Success", "Login successful!");
-      router.replace("/home");
+        const response = await login(email.trim(), password.trim());
+        const token = response.data?.token;
+        const user = response.data?.user;
+
+        if (!token || !user) {
+            throw new Error("Invalid response from server");
+        }
+
+        await AsyncStorage.setItem("userToken", token);
+        await AsyncStorage.setItem("userInfo", JSON.stringify(user));
+
+        Alert.alert("Success", "Login successful!");
+
+        if (user.role === "admin") {
+            router.replace("/admin/trips");
+        } else if (user.role === "user") {
+            router.replace("/home");
+        } else {
+            Alert.alert("Error", "Invalid user role.");
+        }
     } catch (error) {
-      console.error("Login error:", error.message);
-      Alert.alert("Error", "Login failed. Check your credentials.");
+        console.error("Login error:", error.message);
+        Alert.alert("Error", "Login failed. Check your credentials.");
     }
-  };
+};
 
   return (
     <ImageBackground

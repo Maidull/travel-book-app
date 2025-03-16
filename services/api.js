@@ -11,3 +11,19 @@ export const register = async (email, password, name) => {
 export const login = async (email, password) => {
   return axios.post(`${API_URL}/login`, { email, password });
 };
+
+export const fetchTrips = async () => {
+  return axios.get(`${API_URL}/trips`);
+};
+
+export const addTrip = async (trip) => {
+  return axios.post(`${API_URL}/trips`, trip);
+};
+
+export const updateTrip = async (id, trip) => {
+  return axios.put(`${API_URL}/trips/${id}`, trip);
+};
+
+export const deleteTrip = async (id) => {
+  return axios.delete(`${API_URL}/trips/${id}`);
+};
